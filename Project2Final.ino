@@ -22,11 +22,12 @@ const int pinAkuFall     = 10;  // 180° servo (Aku fall)
 // ANIMATION SETTINGS
 // -------------------------
 
-// Jack spin
-int spinSpeed = 120;
-int stopSpeed = 90;
+// Jack spin (now twitchy)
+int twitchForward = 100;   // slight forward
+int twitchBackward = 80;   // slight backward
+int twitchDelay = 60;      // speed of twitch
 
-// Jack fight animation (same behavior as your old Aku loop)
+// Jack fight animation
 int fightUp = 90;
 int fightDown = 0;
 int fightSpeed = 5;
@@ -48,7 +49,7 @@ void setup() {
   pinMode(switchJackFight, INPUT);
   pinMode(switchAku, INPUT);
 
-  jack360.write(stopSpeed);
+  jack360.write(90);      // stop continuous servo
   jackFight.write(fightUp);
   akuFall.write(akuUp);
 }
@@ -59,16 +60,22 @@ void setup() {
 void loop() {
 
   // -------------------------
-  // SWITCH 1 — JACK 360° SPIN
+  // SWITCH 1 — JACK TWITCH (continuous rotation servo)
   // -------------------------
   if (digitalRead(switchJack360) == HIGH) {
-    jack360.write(spinSpeed);
+
+    jack360.write(twitchForward);
+    delay(twitchDelay);
+
+    jack360.write(twitchBackward);
+    delay(twitchDelay);
+
   } else {
-    jack360.write(stopSpeed);
+    jack360.write(90);  // stop continuous servo
   }
 
   // -------------------------
-  // SWITCH 2 — JACK FIGHT (same behavior as old Aku loop)
+  // SWITCH 2 — JACK FIGHT
   // -------------------------
   if (digitalRead(switchJackFight) == HIGH) {
 
@@ -90,24 +97,24 @@ void loop() {
   }
 
  // -------------------------
-// SWITCH 3 — AKU FALL/RISING AT 90° CONTINUOUSLY
-// -------------------------
-if (digitalRead(switchAku) == HIGH) {
+ // SWITCH 3 — AKU FALL/RISING AT 90° CONTINUOUSLY
+ // -------------------------
+ if (digitalRead(switchAku) == HIGH) {
 
-  // Fall to 0° (full 90° drop)
-  for (int pos = akuUp; pos >= akuDown; pos--) {
-    akuFall.write(pos);
-    delay(akuSpeed);
+    // Fall to 45°
+    for (int pos = akuUp; pos >= akuDown; pos--) {
+      akuFall.write(pos);
+      delay(akuSpeed);
 
-    if (digitalRead(switchAku) == LOW) break;
-  }
+      if (digitalRead(switchAku) == LOW) break;
+    }
 
-  // Rise back up to 90°
-  for (int pos = akuDown; pos <= akuUp; pos++) {
-    akuFall.write(pos);
-    delay(akuSpeed);
+    // Rise back up to 90°
+    for (int pos = akuDown; pos <= akuUp; pos++) {
+      akuFall.write(pos);
+      delay(akuSpeed);
 
-    if (digitalRead(switchAku) == LOW) break;
+      if (digitalRead(switchAku) == LOW) break;
     }
   }
 }
